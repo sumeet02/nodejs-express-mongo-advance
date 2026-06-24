@@ -110,17 +110,52 @@ class RedisClient {
       c. Available options are LEFT and RIGHT
 
     $ const res48 = await client.lPush('bikes:repairs', ['bike:1', 'bike:2', 'bike:3', 'bike:4', 'bike:5']);
-      console.log(res48);  // 5  push multiple at time
+      console.log(res48);  // 5  push multiple at time also.. lpush bcm bike:5, bike:4 ...
 
     $ client.lTrim(key, start, end)
       list → [A, B, C, D, E, F, G]
               0  1  2  3  4  5  6
              -7 -6 -5 -4 -3 -2 -1
 
+    |--------------------------------------------------------------------|
       lTrim('list', 0, 4)   → [A, B, C, D, E]       // keep first 5
       lTrim('list', -5, -1) → [C, D, E, F, G]       // keep last 5
       lTrim('list', 1, -1)  → [B, C, D, E, F, G]    // remove first
       Trim('list', 0, -1)  → [A, B, C, D, E, F, G] // keep all
+    |--------------------------------------------------------------------|
+
+
+    $ Blocking operations on lists : -
+    
+      |--------------------------------------------------------------------|
+        const job = await client.rPop('jobs');
+        console.log(job);  //THIS IS NULL
+      |--------------------------------------------------------------------|
+
+      "If the list is empty, wait until an item arrives."- Instead of returning null, 
+      Redis keeps the connection waiting."
+
+      |--------------------------------------------------------------------|
+      |  const result = await client.brPop('jobs', 0);
+      |  console.log(result);
+      |____________________________________________________________________|
+      
+      If the list is empty: Client waits... 
+      once anything add into it.. gets removed OR If the timeout is reached, NULL is returned.
+
+      Problems:-
+        • Constant polling
+        • Wasted CPU
+        • Extra Redis requests
+
+    $ const res37 = await client.set('new_bikes', 'bike:1');
+      console.log(res37);  // store data normally
+
+      const res39 = await client.lPush('new_bikes', 'bike:2', 'bike:3');
+      ❌ redis.exceptions.ResponseError: [SimpleError: WRONGTYPE Operation against a key 
+          holding the wrong kind of value]
+
+    $ client.exists('bikes:repairs') - Return 0 or 1
 
   */
 
