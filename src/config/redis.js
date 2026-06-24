@@ -198,15 +198,18 @@ class RedisClient {
         const res15 = await client.sUnion(['bikes:racing:france', 'bikes:racing:usa'])
         >>> ['bike:1', 'bike:2', 'bike:4']
 
+      $ REMOVE
+        const res19 = await client.sRem('bikes:racing:france', 'bike:1')
+        >>> 1   (1 member removed !!)
+
+      $ GET RANDOM MEMBER
+        const bike = await client.sRandMember('bikes:racing:india');
+        >>> 'bike:2' OR 'bike:3' OR 'bike:5'
+
+        const bike = await client.sRandMember('bikes:racing:india', 2);
+        >>> ['bike:2', 'bike:3']
+
     |----------------------------------------------------------------------------------|
-
-c
-
-
-
-
-
-
 
 
 
