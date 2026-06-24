@@ -159,6 +159,74 @@ class RedisClient {
 
   */
 
+  
+  // ─── Redis sets ──────────────────────────── 
+  /*
+
+    • Track unique items (e.g., track all unique IP addresses accessing a given blog post).
+    • Represent relations (e.g., the set of all users with a given role).
+    • Perform common set operations such as intersection, unions, and differences.
+
+    |----------------------------------------------------------------------------------|
+      $ ADD
+       const res1 = await client.sAdd('bikes:racing:france', 'bike:1')
+       const res2 = await client.sAdd('bikes:racing:usa', ['bike:2', 'bike:4'])
+       const res2 = await client.sAdd('bikes:racing:india', ['bike:2', 'bike:3', 'bike:5'])
+ 
+      $ CHECK IF EXIST
+        const res5 = await client.sIsMember('bikes:racing:usa', 'bike:4')  >>> 1
+        const res6 = await client.sIsMember('bikes:racing:india', 'bike:1') >>> 0
+
+      $ CHECK IF EXIST - MULTIPLE
+        const res12 = await client.smIsMember('bikes:racing:india', ['bike:3', 'bike:5', 'bike:4'])
+            >>> [1, 1, 0]
+
+      $ INTERSECTION
+        const res7 = await client.sInter(['bikes:racing:india', 'bikes:racing:usa'])
+        console.log(res7)  // >>> {'bike:2'}
+
+      $ Get 
+        const res10 = await client.sMembers('bikes:racing:france') >>> ['bike:1']
+
+      $ DIFFERENCE :- (First Set - Second Set)
+        Take all items from France --- Remove anything that also exists in USA
+
+        const res13 = await client.sDiff(['bikes:racing:india', 'bikes:racing:usa'])
+        >>> ['bike:3', 'bike:5']
+
+      $ UNION
+        const res15 = await client.sUnion(['bikes:racing:france', 'bikes:racing:usa'])
+        >>> ['bike:1', 'bike:2', 'bike:4']
+
+    |----------------------------------------------------------------------------------|
+
+c
+
+
+
+
+
+
+
+
+
+
+
+  */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // ─── Sorted Sets (leaderboards, rate limiting) ────────────────────────────
 
