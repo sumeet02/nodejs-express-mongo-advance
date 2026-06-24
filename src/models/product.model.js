@@ -92,18 +92,26 @@ productSchema.pre('save', function (next) {
   next();
 });
 
-/* Index for fast searches
-Enables full text search across multiple fields. 
+//Index for fast searches
 
-This query only works because of text index
-Product.find({ $text: { $search: 'wireless mouse' } })
+/* Enables full text search across multiple fields. 
 
-MongoDB searches name + description + tags together also handles partial matches, stemming (mouse = mice), case insensitive
-Without this index, $text search throws an error.
+This query only works because of text index :- Product.find({ $text: { $search: 'wireless mouse' } })
+
+MongoDB searches name + description + tags together also handles partial matches, 
+stemming (mouse = mice), case insensitive
+
+❌ Without this index, $text search throws an error.
+
 */
 productSchema.index({ name: 'text', description: 'text', tags: 'text' });
 
 //2. Compound Index -- 1 = ascending, -1 = descending.
+/* Product.find({ category: 'electronics' })             // ✅ uses index
+Product.find({ category: 'electronics', price: 5000 }) // ✅ uses index
+
+Product.find({ price: 5000 }) // ❌ can't use index — category must come first
+*/
 productSchema.index({ category: 1, price: 1 });
 // productSchema.index({ slug: 1 });
 

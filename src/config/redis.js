@@ -86,6 +86,7 @@ class RedisClient {
   }
 
   // ─── Lists (queue-like) ───────────────────────────────────────────────────
+ 
 
   async lpush(key, value) {
     await this.client.lPush(key, JSON.stringify(value));
@@ -95,6 +96,34 @@ class RedisClient {
     const val = await this.client.rPop(key);
     return val ? JSON.parse(val) : null;
   }
+
+  /* OTHER TO STUDY 
+    1. lpush --- rpop (queue)
+    2. lpush --- lpop (stack) 
+
+    $ const res9 = await this.client.lLen('bikes:repairs');
+      console.log(res9); // 0
+
+    $ await client.lMove('bikes:repairs', 'bikes:finished', 'LEFT', 'LEFT'); (remove source-left add dest-left)
+      a. either both happen or neither happens ✅
+      b. no data loss possible
+      c. Available options are LEFT and RIGHT
+
+    $ const res48 = await client.lPush('bikes:repairs', ['bike:1', 'bike:2', 'bike:3', 'bike:4', 'bike:5']);
+      console.log(res48);  // 5  push multiple at time
+
+    $ client.lTrim(key, start, end)
+      list → [A, B, C, D, E, F, G]
+              0  1  2  3  4  5  6
+             -7 -6 -5 -4 -3 -2 -1
+
+      lTrim('list', 0, 4)   → [A, B, C, D, E]       // keep first 5
+      lTrim('list', -5, -1) → [C, D, E, F, G]       // keep last 5
+      lTrim('list', 1, -1)  → [B, C, D, E, F, G]    // remove first
+      Trim('list', 0, -1)  → [A, B, C, D, E, F, G] // keep all
+
+  */
+
 
   // ─── Sorted Sets (leaderboards, rate limiting) ────────────────────────────
 

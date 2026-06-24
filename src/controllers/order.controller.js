@@ -99,6 +99,10 @@ export const getOrderById = async (req, res, next) => {
     const cached = await redis.get(cacheKey);
     if (cached) { return successResponse(res, { order: cached, fromCache: true }); }
 
+    /* Performance — Mongoose documents are 3-5x heavier than plain objects
+    Without lean → Mongoose creates full document with all methods/tracking
+    With lean    → Just a plain JS object, much less memory, much faster  */
+    
     const order = await Order.findById(req.params.id).populate('items.product', 'name images price').lean();
     if (!order) { return res.status(404).json({ success: false, message: 'Order not found' }); }
 
@@ -117,6 +121,10 @@ export const updateOrderStatus = async (req, res, next) => {
       req.params.id,
       { status },
       { new: true, runValidators: true }
+      /* 1. new: true - By default findByIdAndUpdate returns the old document (before update).
+         2. runValidators: true - By default Mongoose validators only run on .save() and .create() 
+         — NOT on update operations.
+      */
     );
 
     if (!order) { return res.status(404).json({ success: false, message: 'Order not found' }); }
