@@ -61,8 +61,14 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    /* These options tell Mongoose to include virtual fields when converting a document to JSON or plain object.
+    toJSON  | res.json(doc) | JSON.stringify(doc)
+    toObject | doc.toObject() | spreading { ...doc } */
   }
 );
+
+/* Mongoose virtuals are fields that are not saved in the database. They are made from other
+ data in the document, like combining first and last name to make a full name.  */
 
 // Virtual: discount percentage
 productSchema.virtual('discountPercent').get(function () {
@@ -74,6 +80,9 @@ productSchema.virtual('discountPercent').get(function () {
 
 // Pre-save: auto-generate slug
 productSchema.pre('save', function (next) {
+  /* returns a boolean indicating whether a specific path (or any path in the document) has been changed 
+  since it was last fetched or saved. */
+
   if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()

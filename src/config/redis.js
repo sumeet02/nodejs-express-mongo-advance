@@ -18,6 +18,22 @@ class RedisClient {
     this.client.on('connect', () => console.log('✅ Redis connected'));
     await this.client.connect();
 
+
+    /* When a Redis client subscribes to a channel, it enters a special mode where it can only run 
+       subscribe/unsubscribe commands. It can't do get, set, del or anything else anymore. 
+       Problem if you use the same client:
+
+      Using same client for everything — BREAKS
+          await this.client.subscribe('order:placed', handler); // now client is in subscribe mode
+          await this.client.set('key', 'value'); // ❌ ERROR — client is locked in subscribe mode
+          await this.client.get('key');          // ❌ ERROR — same reason
+
+
+      duplicate() copies all the config (URL, password, options) from the original client — 
+      so you don't have to pass the connection string again. Just a convenience method.
+
+    */
+
     // Dedicated subscriber (cannot run other commands while subscribed)
     this.subscriber = this.client.duplicate();
     await this.subscriber.connect();
@@ -25,6 +41,7 @@ class RedisClient {
     // Dedicated publisher
     this.publisher = this.client.duplicate();
     await this.publisher.connect();
+
 
     return this;
   }
@@ -37,7 +54,7 @@ class RedisClient {
   }
 
   async set(key, value, ttlSeconds = 3600) {
-    await this.client.setEx(key, ttlSeconds, JSON.stringify(value));
+    await this.client.set(key, ttlSeconds, JSON.stringify(value));
   }
 
   async del(key) {

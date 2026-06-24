@@ -15,12 +15,38 @@ const createApp = () => {
 
   // ─── Security Middlewares ────────────────────────────────────────────────────
   
-  app.use(helmet());
+  app.use(helmet()); // helmet.md use for study
 
   app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] }));
+
+  /* OR
+
+  assing array directly - origin : []
+
+  OR
+
+  const allowedOrigins = [
+  "http://localhost:3000",
+  "https://myapp.com",
+  "https://admin.myapp.com",
+  ];
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true); // Allow request
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+    })
+  );
+  
+
+  */
+
   app.use(rateLimiter);
-
-
 
   // ─── Request Parsing ─────────────────────────────────────────────────────────
   app.use(express.json({ limit: '10mb' }));

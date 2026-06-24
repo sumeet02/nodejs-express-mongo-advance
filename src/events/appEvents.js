@@ -13,6 +13,7 @@ class AppEventEmitter extends EventEmitter {
     this.setMaxListeners(20); // allow many subscribers
   }
 
+  // Triggering the event -----
   // Typed emit helpers for autocomplete / clarity
   emitOrderCreated(order) {
     this.emit('order:created', order);
