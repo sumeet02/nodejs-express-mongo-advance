@@ -97,6 +97,12 @@ class RedisClient {
     return val ? JSON.parse(val) : null;
   }
 
+  async disconnect() {
+    await this.client?.quit();
+    await this.subscriber?.quit();
+    await this.publisher?.quit();
+  }
+
   /* OTHER TO STUDY 
     1. lpush --- rpop (queue)
     2. lpush --- lpop (stack) 
@@ -211,25 +217,7 @@ class RedisClient {
 
     |----------------------------------------------------------------------------------|
 
-
-
-
-
   */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // ─── Sorted Sets (leaderboards, rate limiting) ────────────────────────────
 
@@ -241,11 +229,60 @@ class RedisClient {
     return this.client.zRange(key, start, stop, { REV: true });
   }
 
-  async disconnect() {
-    await this.client?.quit();
-    await this.subscriber?.quit();
-    await this.publisher?.quit();
-  }
+  /*
+    |-----------------------------------------------------------------------------|
+
+    ➼ If B and A are two elements with a different score, then A > B if A.score is > B.score.
+    ➼ If B and A have exactly the same score, then A > B if the A string is lexicographically greater 
+        than the B string. B and A strings can't be equal since sorted sets only have unique elements.
+
+    $ const res1 = await client.zAdd('racer_scores', { score: 10, value: 'Norem' });
+      console.log(res1);  // >>> 1
+
+      const res2 = await client.zAdd('racer_scores', { score: 12, value: 'Castilla' });
+      console.log(res2);  // >>> 1
+
+      const res3 = await client.zAdd('racer_scores', [
+        { score: 8, value: 'Sam-Bodden' },
+        { score: 10, value: 'Royce' },
+        { score: 6, value: 'Ford' },
+        { score: 14, value: 'Prickett' },
+        { score: 12, value: 'Castilla' } ]);
+      >>>> 4 (It will add { score: 10, value: 'Royce' } after "Norem" as per above rule of A < B )
+      >>>> ['Ford', 'Sam-Bodden', 'Norem', 'Royce', 'Castilla', 'Prickett']
+
+      const res6 = await client.zRangeWithScores('racer_scores', 0, -1);
+      >>> [ { value: 'Ford', score: 6 }, { value: 'Sam-Bodden', score: 8 }, .......]
+
+      const res7 = await client.zRangeByScore('racer_scores', '-inf', 10);
+      >>> ['Ford', 'Sam-Bodden', 'Norem', 'Royce'] (SCORE LESS THAN EQUAL 10)
+
+    $ REMOED BY SCORE
+      const res9 = await client.zRemRangeByScore('racer_scores', '-inf', 9);
+      >>> 2  (score less tat rqual 9)
+
+
+      Example set :- ['Norem', 'Royce', 'Prickett']
+      const res11 = await client.zRank('racer_scores', 'Norem');
+      >>> 0
+
+      const res12 = await client.zRevRank('racer_scores', 'Norem');
+      >>> 2
+
+    ➼ What does [ mean? :-
+        [ = inclusive
+        ( = exclusive
+
+      const res15 = await client.zRangeByLex('racer_scores', '[A', '[L');
+      >>> ['Castilla', 'Ford'] (FROM A TO L)
+
+
+
+
+
+  */
+
+
 }
 
 export default new RedisClient();
