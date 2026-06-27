@@ -276,13 +276,36 @@ class RedisClient {
       const res15 = await client.zRangeByLex('racer_scores', '[A', '[L');
       >>> ['Castilla', 'Ford'] (FROM A TO L)
 
-
-
-
-
+      const res18 = await client.zAdd('racer_scores', { score: 150, value: 'Henshaw' }, { nx: true });
+      >>> 0    (nx= not exist.. If already present dont add) "don't update existing members",
   */
 
+  /*
+    -------------------------REDIS HASH----------------------
 
+      const res1 = await client.hSet('bike:1', {
+          'model': 'Deimos',
+          'brand': 'Ergonom',
+          'type': 'Enduro bikes',
+          'price': 4972,
+        })
+      console.log(res1) // 4
+
+      const res2 = await client.hGet('bike:1', 'model')
+      >>> 'Deimos'
+
+      const res5 = await client.hmGet('bike:1', ['model', 'price'])
+      >>> ['Deimos', '4972']
+
+      const res4 = await client.hGetAll('bike:1')
+      >>> return whole object
+      
+      const res6 = await client.hIncrBy('bike:1', 'price', 100)
+      >>> 5072
+
+      const res7 = await client.hIncrBy('bike:1', 'price', -100)
+      >>> 4972
+  */
 }
 
 export default new RedisClient();
